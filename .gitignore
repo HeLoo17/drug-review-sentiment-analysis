@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Data (dataset license restricts redistribution)
+data/*.tsv
+data/*.csv
