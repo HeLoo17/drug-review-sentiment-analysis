@@ -67,5 +67,20 @@ Processed matrices and models are written to `data/processed/` (ignored by git).
 - Topic sweep k=5..8; best **k=5** (c_v coherence ≈ 0.73)
 - Themes include: GI/onset & sleep disruption; minimal/generic language; severe pain/nausea/fatigue; skin/acne; weight/dryness/sexual effects
 
+
+## Streamlit Insight Console (Deployment)
+
+Interactive prototype that displays research insights and (optionally) live 3-class scoring:
+
+```bash
+pip install -r requirements.txt
+# Optional for live scoring: run notebooks 02–04 so data/processed/ exists
+streamlit run app/streamlit_app.py
+```
+
+App pages: Research Overview · Effectiveness Insights · Side-Effect Topics · Live Review Scoring · Deployment Architecture.
+
+Summary CSVs used by the app live in `app/artifacts/` (committed). Figures load from `visuals/`.
+
 ## License
 Code is licensed under MIT. Dataset usage is subject to UCI's terms — see link above.
