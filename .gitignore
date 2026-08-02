@@ -220,3 +220,4 @@ __marimo__/
 # Data (dataset license restricts redistribution)
 data/*.tsv
 data/*.csv
+data/processed/
