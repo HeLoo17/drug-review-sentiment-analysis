@@ -26,6 +26,12 @@ data/                               # Raw + processed artifacts (gitignored)
 requirements.txt
 ```
 
+## Project Report
+
+Full CRISP-DM assignment documentation (mapped to the XBDS2024N brief and assessment rubric):
+
+- [`docs/XBDS2024N_Project_Report.md`](docs/XBDS2024N_Project_Report.md)
+
 ## Methodology
 This project follows CRISP-DM:
 
