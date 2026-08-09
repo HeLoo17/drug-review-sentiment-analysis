@@ -558,6 +558,6 @@ Röder, M., Both, A., & Hinneburg, A. (2015). Exploring the space of topic coher
 
 ---
 
-**Word count:** approximately 3,450 words (excluding table of contents, rubric table headers, and reference list).  
+**Word count:** approximately 3,570 words (excluding reference list; body text including tables ≈ 3,650).  
 
 *Formatting note for formal PDF export:* convert this Markdown to PDF using Times New Roman or Arial 11 pt, 1.15 line spacing, justified paragraphs, numbered pages, and APA citations as specified in the assignment caveat. All figures above are computer-generated (`visuals/`).
