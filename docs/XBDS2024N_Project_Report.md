@@ -34,7 +34,7 @@ Two complementary text-mining tasks are addressed:
 1. **Supervised classification (Model 1):** Predict perceived drug **effectiveness** from free-text `benefitsReview` using TF-IDF features with Logistic Regression and Linear SVM, comparing original **5-class** labels with a binned **3-class** scheme.
 2. **Unsupervised topic modeling (Model 2):** Discover latent **side-effect themes** from `sideEffectsReview` using Latent Dirichlet Allocation (LDA), with topic count selected by coherence and topics labeled from top keywords.
 
-Together, these models support a practical triage scenario: flag reviews that sound ineffective, and organise side-effect language into interpretable themes for analysts. All diagrams in this report are generated computationally (no hand-drawn figures), consistent with assignment requirements.
+Together, these models support a practical triage scenario: flag reviews that sound ineffective, and organise side-effect language into interpretable themes for analysts. Deployment is demonstrated via a **Streamlit Insight Console** that accepts user-entered reviews and side-effect descriptions. All diagrams in this report are generated computationally (no hand-drawn figures), consistent with assignment requirements.
 
 ---
 
@@ -63,7 +63,7 @@ This is a **decision-support** research problem, not a clinical diagnostic syste
 | Predict effectiveness from benefits text | Trained LR / Linear SVM models with metrics versus a majority baseline |
 | Quantify label granularity trade-offs | Side-by-side 5-class vs 3-class accuracy, macro-F1, and confusion matrices |
 | Discover side-effect themes | 5–8 LDA topics with human-readable labels and keyword charts |
-| Propose deployment | Conceptual Insight Console architecture and workflow |
+| Propose deployment | Working Streamlit Insight Console + conceptual architecture |
 
 ### 2.4 Stakeholders
 
@@ -443,46 +443,78 @@ ROC-AUC is less central here because the primary production framing is multiclas
 
 ## 7. Deployment (Suggested Application)
 
-Deployment is conceptualised in `06_deployment.ipynb` as a **Drug Review Insight Console** for pharmacovigilance / medical information / moderation teams. It is a research prototype design, not a medical device.
+Deployment is delivered as a working **Streamlit Insight Console** (`app/streamlit_app.py`), documented conceptually in `06_deployment.ipynb`. The prototype lets users interact with both trained models in a browser: score a benefits review for **3-class effectiveness**, and match free-text side effects to **LDA topics**, each with **hardcoded sample recommendations**. It is a research demonstration for pharmacovigilance / medical-information style triage—not a medical device and not medical advice.
 
-### 7.1 Users and jobs-to-be-done
+### 7.1 Interactive Streamlit prototype
 
-- **Inbox:** newest reviews with predicted 3-class effectiveness and dominant side-effect topic.
-- **Theme explorer:** LDA topic volumes over time.
-- **Review detail:** raw text, cleaned tokens, top contributing TF-IDF terms, topic mixture.
-- **Human review queue:** Low effectiveness and/or high-concern topics requiring analyst sign-off.
+**Launch (from repository root):**
 
-### 7.2 Conceptual architecture
+```bash
+pip install -r requirements.txt
+# ensure notebooks 02–04 have produced data/processed/ artefacts
+streamlit run app/streamlit_app.py
+```
+
+**Page 1 — Effectiveness Classifier**
+
+| Element | Behaviour |
+|---------|-----------|
+| Input | Free-text benefits-style review (with High / Moderate / Low example presets) |
+| Pipeline | Same cleaning as training → TF-IDF (`tfidf_vectorizer.pkl`) → Logistic Regression 3-class (`model1_log_reg_3.pkl`) |
+| Output | Predicted class (High / Moderate / Low), class probabilities, routing hint (Low → human review) |
+| Recommendation | Hardcoded sample tip from `app/artifacts/recommendations.json` keyed by predicted class |
+
+**Page 2 — Side-Effect Topic Matcher**
+
+| Element | Behaviour |
+|---------|-----------|
+| Input | Free-text description of side effects the user suffers |
+| Pipeline | Same cleaning → CountVectorizer (`count_vectorizer.pkl`) → Gensim LDA (`model2_lda.model`) |
+| Output | Topics with probability ≥ threshold (default 0.15), sorted by score, using labels from `app/artifacts/model2_topic_labels.csv` |
+| Suggestions | Hardcoded per-topic sample tips (GI/sleep, minimal/generic, severe systemic, skin/acne, weight/dryness/sexual) |
+
+Hardcoded tips are explicitly framed as **demo / non-clinical** wording (e.g., keep a symptom diary; escalate severe symptoms to a clinician; do not self-adjust dose).
+
+### 7.2 Users and jobs-to-be-done
+
+- **Analyst / student demo user:** paste a review or symptom narrative and immediately see model outputs.
+- **Triage simulation:** Low effectiveness or severe-topic matches highlight a human-review route.
+- **Theme exploration:** matched LDA topics show which side-effect themes the free text resembles.
+- **Education / presentation:** live demo of CRISP-DM deployment without building a full production stack.
+
+### 7.3 Conceptual architecture (production target)
+
+The Streamlit app is the interactive front end of a broader architecture sketched in the deployment notebook:
 
 ![Deployment architecture](../visuals/deployment_architecture.png)
 
-*Figure 14. Suggested deployment architecture (computationally generated).*
+*Figure 14. Suggested deployment architecture (computationally generated). Streamlit implements the Insight Console UI and on-demand scoring path.*
 
-**Components:** review sources → ingestion/validation → shared text preparation → Model 1 scoring + Model 2 topic inference → scoring service / warehouse → Insight Console UI → analyst actions with feedback for retraining.
+**Components:** review / symptom text → shared text preparation → Model 1 (3-class) + Model 2 (LDA) → Insight Console (Streamlit) → analyst actions / sample recommendations; production systems could wrap the same artefacts in batch jobs or a REST API with feedback for retraining.
 
-### 7.3 End-to-end workflow
+### 7.4 End-to-end workflow (as implemented)
 
-1. Ingest `benefitsReview` and `sideEffectsReview` (plus drug/condition metadata).
-2. Apply the same cleaning function and persisted vectorizers used in training.
-3. Score Model 1 (primary: 3-class; optional: 5-class detail).
-4. Infer LDA topic mixture; attach dominant topic label.
-5. Route Low effectiveness or severe-topic hits to human review; otherwise archive/search index.
-6. Monitor class priors, topic drift, and feedback labels; retrain on a schedule.
+1. User opens the Streamlit console and chooses Effectiveness Classifier or Side-Effect Topic Matcher.
+2. Text is cleaned with the training-time lemmatisation / negation-aware stop-word rules.
+3. **Classifier path:** TF-IDF → 3-class Logistic Regression → class + probabilities → hardcoded recommendation + Low-class review route.
+4. **Topic path:** Count vectorizer → LDA document–topic distribution → topics above threshold → per-topic hardcoded suggestions.
+5. Disclaimer is shown continuously: research prototype only; consult a qualified clinician for real decisions.
 
-### 7.4 Integration options
+### 7.5 Integration options
 
-| Mode | When to use |
-|------|-------------|
-| Nightly batch | Score exports; power BI dashboards |
-| REST microservice | On-submit scoring for live queues |
-| Analytics notebooks | Ad-hoc research (current repository pattern) |
+| Mode | Role relative to this project |
+|------|-------------------------------|
+| **Streamlit app (implemented)** | Interactive deployment prototype for demos and local triage trials |
+| Nightly batch | Future: score platform exports into a warehouse / BI dashboard |
+| REST microservice | Future: on-submit scoring for live moderation queues |
+| Analytics notebooks | Ad-hoc research (`00`–`06`) |
 
-### 7.5 Production caveats
+### 7.6 Production caveats
 
 - UCI Druglib terms restrict commercial redistribution/use; production systems need appropriately licensed corpora.
-- UI must state that outputs are automated research signals, not medical advice.
-- Free text may be sensitive; apply access control and careful logging.
-- Prefer explainability artefacts (top contributing terms) beside predictions.
+- UI states that outputs are automated research signals, not medical advice; recommendations are hardcoded samples.
+- Free text may be sensitive; apply access control and careful logging in any real deployment.
+- Models and vectorizers must remain versioned together (`data/processed/`); retrain when language or drug mix drifts.
 
 ---
 
@@ -501,7 +533,7 @@ Ethical handling is encouraged by the brief and is woven through this project:
 
 ## 9. Conclusion
 
-This assignment applied the full CRISP-DM cycle to authentic patient drug-review text. Business understanding framed a triage problem for effectiveness language and side-effect themes. Data understanding exposed imbalance and text sparsity. Preparation built negation-aware cleaning, TF-IDF classification features, count-based topic features, and a 3-class label comparison. Modeling delivered Logistic Regression and Linear SVM classifiers plus an LDA topic model. Evaluation showed clear macro-F1 gains over majority baselines and a coherent five-topic side-effect structure, with 3-class LR recommended for triage. Deployment proposed an Insight Console architecture with human review gates. The solution is transparent, reproducible via ordered notebooks, and explicitly bounded by ethical constraints.
+This assignment applied the full CRISP-DM cycle to authentic patient drug-review text. Business understanding framed a triage problem for effectiveness language and side-effect themes. Data understanding exposed imbalance and text sparsity. Preparation built negation-aware cleaning, TF-IDF classification features, count-based topic features, and a 3-class label comparison. Modeling delivered Logistic Regression and Linear SVM classifiers plus an LDA topic model. Evaluation showed clear macro-F1 gains over majority baselines and a coherent five-topic side-effect structure, with 3-class LR recommended for triage. Deployment is realised as a **Streamlit Insight Console** (`streamlit run app/streamlit_app.py`) that classifies benefits reviews, matches free-text side effects to LDA topics, and surfaces hardcoded sample recommendations, backed by a conceptual production architecture with human review gates. The solution is transparent, reproducible via ordered notebooks, and explicitly bounded by ethical constraints.
 
 ---
 
@@ -515,11 +547,14 @@ This assignment applied the full CRISP-DM cycle to authentic patient drug-review
 | Model 1 | `notebooks/03_model_1_modeling.ipynb` |
 | Model 2 | `notebooks/04_model_2_topic_modeling.ipynb` |
 | Evaluation | `notebooks/05_evaluation.ipynb` |
-| Deployment | `notebooks/06_deployment.ipynb` |
+| Deployment (conceptual) | `notebooks/06_deployment.ipynb` |
+| Deployment (interactive) | `app/streamlit_app.py` |
+| Hardcoded recommendations | `app/artifacts/recommendations.json` |
+| Topic labels (app) | `app/artifacts/model2_topic_labels.csv` |
 | Figures | `visuals/*.png` |
 | Dependencies | `requirements.txt` |
 
-**Run order:** place Druglib TSVs in `data/` → `pip install -r requirements.txt` → execute notebooks `00` through `06`.
+**Run order:** place Druglib TSVs in `data/` → `pip install -r requirements.txt` → execute notebooks `00` through `06` → launch the console with `streamlit run app/streamlit_app.py`.
 
 ---
 
@@ -534,9 +569,9 @@ Submission requirement: report **and** assessment rubric. The table below maps t
 | **Text Data Preparation (20%)** | Thorough cleaning/tokenisation/features with justification | Section 4; notebook `02`; Figure 6 | 16–20 |
 | **Modeling (25%)** | ≥2 appropriate models; clear implementation, parameters, justification | Section 5; notebooks `03`–`04` (LR, SVM, LDA + 3-vs-5 study) | 16–20 |
 | **Evaluation (20%)** | Appropriate metrics, visuals, comparison, limitations | Section 6; notebook `05`; Figures 7–13 | 16–20 |
-| **Deployment (10%)** | Realistic architecture, workflow, business application | Section 7; notebook `06`; Figure 14 | 16–20 |
+| **Deployment (10%)** | Realistic architecture, workflow, business application | Section 7; Streamlit app `app/streamlit_app.py`; notebook `06`; Figure 14 | 16–20 |
 
-**Communication / Presentation (separate 10% component):** not scored in this written document; the presentation should summarise Sections 2–7, demonstrate notebook/visual fluency, and answer questions on imbalance, 3-vs-5 trade-offs, and LDA labeling.
+**Communication / Presentation (separate 10% component):** not scored in this written document; the presentation should summarise Sections 2–7, demonstrate the Streamlit console live if possible, show notebook/visual fluency, and answer questions on imbalance, 3-vs-5 trade-offs, and LDA labeling.
 
 **Walkthrough attendance note (brief Requirement 1):** maximum mark is capped at 40% without walkthrough attendance — administrative, independent of report quality.
 
@@ -558,6 +593,6 @@ Röder, M., Both, A., & Hinneburg, A. (2015). Exploring the space of topic coher
 
 ---
 
-**Word count:** approximately 3,570 words (excluding reference list; body text including tables ≈ 3,650).  
+**Word count:** approximately 3,850 words (excluding reference list; body text including tables ≈ 3,950).  
 
 *Formatting note for formal PDF export:* convert this Markdown to PDF using Times New Roman or Arial 11 pt, 1.15 line spacing, justified paragraphs, numbered pages, and APA citations as specified in the assignment caveat. All figures above are computer-generated (`visuals/`).
