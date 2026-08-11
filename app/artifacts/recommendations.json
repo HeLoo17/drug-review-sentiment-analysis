@@ -1,0 +1,40 @@
+{
+  "disclaimer": "Research demo only — not medical advice. These are sample hardcoded tips for the XBDS2024N deployment prototype. Always consult a qualified clinician or pharmacist before changing medication.",
+  "effectiveness": {
+    "High": {
+      "title": "High perceived effectiveness",
+      "recommendation": "Sample tip: Keep a short symptom diary of what improved and for how long. Share this with your clinician at the next review so they can decide whether to maintain the current plan. Do not change dose on your own."
+    },
+    "Moderate": {
+      "title": "Moderate / partial response",
+      "recommendation": "Sample tip: Track which symptoms improved vs which remain for 1–2 weeks. Note timing relative to doses and any lifestyle factors. Bring this record to your clinician or pharmacist to discuss whether adjustment, waiting, or follow-up is appropriate."
+    },
+    "Low": {
+      "title": "Low perceived effectiveness",
+      "recommendation": "Sample tip: Escalate to a clinician or pharmacist rather than stopping or increasing the dose yourself. List when the medicine was started, adherence, and other medicines/supplements. This prediction is a triage signal only, not a diagnosis."
+    }
+  },
+  "side_effect_topics": {
+    "0": {
+      "label": "Onset / GI discomfort & sleep disruption",
+      "suggestion": "Sample tip: Note whether stomach upset or sleep issues start soon after a dose or at night. Avoid taking doses on an empty stomach unless directed. Discuss timing, food, and sleep hygiene with a pharmacist before changing anything."
+    },
+    "1": {
+      "label": "Minimal / generic side-effect language",
+      "suggestion": "Sample tip: If effects feel mild or hard to describe, still log date, severity (1–10), and duration. Mild wording can hide gradual changes — share the log at your next appointment."
+    },
+    "2": {
+      "label": "Severe pain, nausea, headache & fatigue",
+      "suggestion": "Sample tip: Severe pain, persistent vomiting, sudden intense headache, or extreme fatigue warrant prompt clinical advice (urgent care / emergency if sudden and severe). Do not wait to self-manage serious symptoms."
+    },
+    "3": {
+      "label": "Skin / acne treatment effects",
+      "suggestion": "Sample tip: Photograph skin changes, note products applied, and avoid stacking new topical actives without advice. Seek care urgently for spreading rash, blistering, or facial/lip swelling."
+    },
+    "4": {
+      "label": "Weight, dryness & sexual side effects",
+      "suggestion": "Sample tip: Track weight, dry mouth/eyes, and sexual side effects privately and discuss them openly with a clinician — these are common conversation topics and may have management options. Do not stop medicine abruptly without professional guidance."
+    }
+  },
+  "topic_match_threshold": 0.15
+}
