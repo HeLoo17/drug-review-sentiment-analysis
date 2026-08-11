@@ -21,6 +21,9 @@ notebooks/
   04_model_2_topic_modeling.ipynb   # LDA side-effect topics (k=5–8)
   05_evaluation.ipynb               # Cross-model evaluation
   06_deployment.ipynb               # Suggested Insight Console architecture
+app/
+  streamlit_app.py                   # Interactive classifier + topic matcher
+  artifacts/                         # Recommendations + topic labels
 visuals/                            # Figures exported by notebooks
 data/                               # Raw + processed artifacts (gitignored)
 requirements.txt
@@ -72,6 +75,23 @@ Processed matrices and models are written to `data/processed/` (ignored by git).
 
 - Topic sweep k=5..8; best **k=5** (c_v coherence ≈ 0.73)
 - Themes include: GI/onset & sleep disruption; minimal/generic language; severe pain/nausea/fatigue; skin/acne; weight/dryness/sexual effects
+
+
+## Streamlit Insight Console (Deployment)
+
+Interactive prototype for live scoring:
+
+```bash
+pip install -r requirements.txt
+# Ensure notebooks 02–04 have been run so data/processed/ models exist
+streamlit run app/streamlit_app.py
+```
+
+Pages:
+1. **Effectiveness Classifier** — paste a benefits review → 3-class (High / Moderate / Low) + sample recommendation
+2. **Side-Effect Topic Matcher** — describe symptoms in free text → matching LDA topics + sample suggestions
+
+Hardcoded tips live in `app/artifacts/recommendations.json` (demo / non-medical). Topic labels: `app/artifacts/model2_topic_labels.csv`.
 
 ## License
 Code is licensed under MIT. Dataset usage is subject to UCI's terms — see link above.
