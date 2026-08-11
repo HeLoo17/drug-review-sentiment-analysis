@@ -20,7 +20,6 @@ notebooks/
   03_model_1_modeling.ipynb         # LR / SVM — 5-class vs 3-class comparison
   04_model_2_topic_modeling.ipynb   # LDA side-effect topics (k=5–8)
   05_evaluation.ipynb               # Cross-model evaluation
-  06_deployment.ipynb               # Suggested Insight Console architecture
 app/
   streamlit_app.py                   # Interactive classifier + topic matcher
   artifacts/                         # Recommendations + topic labels
