@@ -366,12 +366,12 @@ else:
                             "suggestion": suggestion,
                         }
                     )
-                    warn = tid == 2  # severe systemic topic
+                    warn = tid in {0, 5, 6}  # higher-concern themes in k=7 labeling
                     card(
                         f"<b>Topic {tid}: {tip_block.get('label', label)}</b> "
                         f"(score {p:.0%})<br/>{suggestion}",
                         warn=warn,
-                        ok=(tid == 1),
+                        ok=(tid == 2),
                     )
 
                 chart_df = pd.DataFrame(rows).set_index("label")["probability"]
